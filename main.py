@@ -1,10 +1,11 @@
 import RPi.GPIO as GPIO
 import pychromecast
 import logging
+import time
 
 def main_control():	
 	
-	CHROMECAST_NAME = 'kbTV'
+	CHROMECAST_NAME = 'Living Room'
 	cast = None
 	chromecast_ip = None
 	
@@ -39,14 +40,16 @@ def main_control():
 		mc = cast.media_controller
 		mc.block_until_active()
 		if mc.status.player_is_playing:
-			if mc.status.supports_seek:
-				mc.seek(max(0, mc.status.current_time - 10))
-				logging.info("Rewinded 10 secs " + CHROMECAST_NAME)
 			mc.pause()
 			logging.info("Paused " + CHROMECAST_NAME)
 		elif mc.status.player_is_paused:
-			mc.play()	
-			logging.info("Played " + CHROMECAST_NAME)
+			if mc.status.supports_seek:
+				mc.seek(max(0, mc.status.current_time - 10))
+				logging.info("Rewinded 10 secs " + CHROMECAST_NAME)
+			time.sleep(.5)
+			if mc.status.player_is_paused:
+				mc.play()	
+				logging.info("Played " + CHROMECAST_NAME)
 	else:
 		logging.error("Could not establish connection with Living Room Chromecast..")
 
