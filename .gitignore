@@ -1,0 +1,4 @@
+venv/
+*.pyc
+.living_room_chromecast_ip
+chromecast_control.log
