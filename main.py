@@ -3,8 +3,10 @@ import pychromecast
 import logging
 import time
 
-def main_control():	
-	
+def main_control(pause_delay=0):	
+
+	start_time = time.time()	
+	REWIND_PADDING = 10
 	CHROMECAST_NAME = 'Living Room'
 	cast = None
 	chromecast_ip = None
@@ -39,34 +41,46 @@ def main_control():
 			logging.info("Stored Living Room Chromecast IP of: " + str(cast.host))
 		mc = cast.media_controller
 		mc.block_until_active()
+		casted_app = cast.status.display_name.lower()
 		if mc.status.player_is_playing:
 			mc.pause()
-			logging.info("Paused " + CHROMECAST_NAME)
+			pause_delay = int(time.time() - start_time)
+			logging.info("Paused " + CHROMECAST_NAME + ", delay was " + str(pause_delay) + " seconds")
+			return pause_delay
 		elif mc.status.player_is_paused:
-			if mc.status.supports_seek:
-				mc.seek(max(0, mc.status.current_time - 10))
-				logging.info("Rewinded 10 secs " + CHROMECAST_NAME)
-			time.sleep(.5)
-			if mc.status.player_is_paused:
+			if casted_app in ('netflix','hulu','hbo go'):
+				if mc.status.supports_seek:
+					rewind_time = pause_delay + REWIND_PADDING
+					mc.seek(max(0, mc.status.current_time - rewind_time))
+					logging.info("Rewinded " + str(rewind_time) + " secs " + CHROMECAST_NAME)
+				else:
+					mc.play()	
+					logging.info("Played " + CHROMECAST_NAME)					
+			else:
 				mc.play()	
 				logging.info("Played " + CHROMECAST_NAME)
+		#mc.tear_down()
+		#cast.disconnect()
 	else:
 		logging.error("Could not establish connection with Living Room Chromecast..")
 
 def main():
 	logging.basicConfig(level=logging.INFO,
 		format='%(asctime)s %(levelname)s %(message)s',
-		filename='chromecast_control.log')
+		filename='/home/dan/chromecast_control/chromecast_control.log')
 	
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	
+	pause_delay = 0
 	while True:
 		try:
 			GPIO.wait_for_edge(17, GPIO.FALLING)
-			main_control()
-		except:
+			pause_delay = main_control(pause_delay)
+		except KeyboardInterrupt:				
+			logging.info("KeyboardInterrupt ended program...")
 			break
+		except Exception as e:
+			logging.error("Encountered exception in main while loop: " + str(e))
 	GPIO.cleanup()
 
 if __name__ == '__main__':
