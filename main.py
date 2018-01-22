@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import pychromecast
 import logging
 import time
+import os
 
 def main_control(pause_delay=0):	
 
@@ -14,7 +15,7 @@ def main_control(pause_delay=0):
 	
 	try:
 		with open('.living_room_chromecast_ip', 'r') as f:
-			chromecast_ip = f.read()
+			chromecast_ip = f.read().strip()
 	except Exception as e:
 		logging.warning(str(e))
 		pass
@@ -22,14 +23,19 @@ def main_control(pause_delay=0):
 	if chromecast_ip:
 		logging.info("Retrieved saved Living Room Chromecast IP of: " + str(chromecast_ip))
 		try:
-			cast = pychromecast.Chromecast(chromecast_ip)
+			ping_result = os.system("ping -c 1 -w2 " + chromecast_ip + " > /dev/null 2>&1")	
+			if ping_result == 0:
+				logging.info("Successfully pinged " + str(chromecast_ip) + ", attempting direct connect")
+				cast = pychromecast.Chromecast(chromecast_ip)
+			else:
+				raise Exception("Ping unsuccessful, skipping direct connect")
 		except Exception as e:
-			logging.warning("Failed to connect directly: " + str(e))
+			logging.info("Unable to connect directly: " + str(e))
 			pass
 		else:
 			cast.wait()
 	
-	if not cast:
+	if not cast or cast.device.friendly_name != CHROMECAST_NAME:
 		logging.info("Attempting to discover all chromecasts, fallback for direct connect")
 		chromecasts = pychromecast.get_chromecasts()
 		if chromecasts:
