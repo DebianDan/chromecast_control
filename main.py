@@ -63,7 +63,7 @@ def main_control(pause_delay=0):
 					mc.seek(max(0, mc.status.current_time - rewind_time))
 					logging.info("Rewinded " + str(rewind_time) + " secs " + CHROMECAST_NAME)
 					# need to play after rewinding some apps
-					if casted_app in ('google play movies'):
+					if casted_app in ('hulu','google play movies'):
 						mc.play()
 						logging.info("Played " + CHROMECAST_NAME)
 				else:
