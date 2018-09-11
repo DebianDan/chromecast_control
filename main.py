@@ -57,15 +57,20 @@ def main_control(pause_delay=0):
 			logging.info("Paused " + CHROMECAST_NAME + ", delay was " + str(pause_delay) + " seconds")
 			return pause_delay
 		elif mc.status.player_is_paused:
-			if casted_app in ('netflix','hulu','hbo go'):
+			if casted_app in ('netflix','hulu','hbo go','google play movies','youtube'):
 				if mc.status.supports_seek:
 					rewind_time = pause_delay + REWIND_PADDING
 					mc.seek(max(0, mc.status.current_time - rewind_time))
 					logging.info("Rewinded " + str(rewind_time) + " secs " + CHROMECAST_NAME)
+					# need to play after rewinding some apps
+					if casted_app in ('google play movies'):
+						mc.play()
+						logging.info("Played " + CHROMECAST_NAME)
 				else:
 					mc.play()	
 					logging.info("Played " + CHROMECAST_NAME)					
 			else:
+				logging.info("App '" + str(casted_app) + "' not rewinded, consider adding")
 				mc.play()	
 				logging.info("Played " + CHROMECAST_NAME)
 		#mc.tear_down()
@@ -73,6 +78,8 @@ def main_control(pause_delay=0):
 	else:
 		logging.error("Could not establish connection with Living Room Chromecast..")
 		blink_for_error()
+	# added in the case that it doesn't play from a paused state
+	return pause_delay
 
 def blink_for_error():
 	for _ in range(4):

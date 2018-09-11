@@ -1,2 +1,2 @@
-PyChromecast==1.0.3
+PyChromecast==2.3.0
 RPi.GPIO==0.6.3
