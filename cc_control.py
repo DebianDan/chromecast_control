@@ -47,7 +47,7 @@ def main_control(chromecast_name, chromecast_ip=None, rewind_padding=10, pause_d
 			return pause_delay
 		elif mc.status.player_is_paused:
 			if casted_app in ('netflix','hulu','hbo go','google play movies','youtube') and mc.status.supports_seek:
-				rewind_time = pause_delay + REWIND_PADDING if pause_delay else REWIND_PADDING
+				rewind_time = pause_delay + rewind_padding if pause_delay else rewind_padding
 				mc.seek(max(0, mc.status.current_time - rewind_time))
 				logging.info("Rewinded " + casted_app + " on " + chromecast_name + " " + str(rewind_time) + " seconds")
 				# need to play after rewinding some apps
