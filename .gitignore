@@ -1,6 +1,6 @@
 venv/
-config/
+WIP/
 *.pyc
-.living_room_chromecast_ip
-chromecast_control.log
+*.log
+.*_ip
 .DS_Store
