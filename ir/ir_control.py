@@ -36,7 +36,7 @@ def cc_play(mc, casted_app):
 
 
 def cc_rewind(mc, casted_app, rewind_secs):
-    if casted_app in ('netflix','hulu','hbo go','google play movies','youtube') and mc.status.supports_seek:
+    if casted_app not in ('spotify') and mc.status.supports_seek:
         mc.seek(max(0, mc.status.current_time - rewind_secs))
         logging.info("Rewinded " + casted_app + " " + str(rewind_secs) + " seconds")
         # need to play after rewinding some apps
@@ -148,7 +148,7 @@ def main():
             try:
                 if ir_event.type == evdev.ecodes.EV_KEY:
                     key_event = evdev.categorize(ir_event)
-                    logging.info("[-] {}".format(key_event)) # TODO remove after stable
+                    logging.debug("[-] {}".format(key_event))
 
                     if key_event.keystate == 0: #0=up, 1=down, 2=hold, only trigger on release events
                         key_code = key_event.keycode
